@@ -1,0 +1,1111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>ChronoCoach — AI Study Planner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet"/>
+<script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0c0d10;--bg2:#13141a;--bg3:#1a1b24;--bg4:#22232f;--bg5:#2a2c3a;
+  --border:#2e3040;--border2:#3d4055;
+  --text:#f0f1f5;--text2:#a8abbe;--text3:#6b6f87;
+  --accent:#7c6af7;--accent2:#9d8fff;--accent-bg:#1e1a3a;
+  --green:#34d89a;--green-bg:#0d2b1e;
+  --amber:#f5a623;--amber-bg:#2b1e08;
+  --red:#ff5f6b;--red-bg:#2b1010;
+  --blue:#4ea8e8;--blue-bg:#0d1f2e;
+  --pink:#f06292;
+  --radius:10px;--radius-lg:16px;--radius-xl:22px;
+  --shadow:0 4px 24px rgba(0,0,0,0.4);
+  --font-serif:'DM Serif Display',serif;
+  --font-sans:'DM Sans',sans-serif;
+}
+html{font-family:var(--font-sans);background:var(--bg);color:var(--text);font-size:15px;line-height:1.6;height:100%}
+body{height:100%;overflow:hidden}
+#root{height:100%;display:flex;flex-direction:column}
+button{font-family:var(--font-sans);cursor:pointer;border:none;outline:none}
+input,textarea,select{font-family:var(--font-sans)}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
+
+/* APP SHELL */
+.app-shell{display:flex;height:100%;overflow:hidden}
+.sidebar{width:220px;min-width:220px;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:0;overflow:hidden}
+.main-panel{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.right-panel{width:320px;min-width:320px;background:var(--bg2);border-left:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
+
+/* SIDEBAR */
+.sidebar-logo{padding:18px 16px 14px;border-bottom:1px solid var(--border)}
+.sidebar-logo .brand{display:flex;align-items:center;gap:9px}
+.logo-mark{width:30px;height:30px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;color:#fff;flex-shrink:0}
+.brand-name{font-family:var(--font-serif);font-size:17px;color:var(--text);letter-spacing:-0.3px}
+.brand-tag{font-size:10px;color:var(--text3);margin-top:-2px}
+.sidebar-nav{flex:1;overflow-y:auto;padding:10px 8px}
+.nav-section-label{font-size:10px;font-weight:600;letter-spacing:0.8px;text-transform:uppercase;color:var(--text3);padding:8px 8px 4px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:var(--radius);cursor:pointer;font-size:13.5px;color:var(--text2);transition:all 0.15s;margin-bottom:1px;user-select:none}
+.nav-item:hover{background:var(--bg4);color:var(--text)}
+.nav-item.active{background:var(--accent-bg);color:var(--accent2)}
+.nav-item .icon{font-size:17px;width:20px;text-align:center;flex-shrink:0}
+.nav-item .badge{margin-left:auto;background:var(--accent);color:#fff;font-size:10px;font-weight:600;padding:1px 6px;border-radius:99px;min-width:18px;text-align:center}
+.nav-divider{height:1px;background:var(--border);margin:8px 8px}
+.sidebar-footer{padding:12px 8px;border-top:1px solid var(--border)}
+.user-chip{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:var(--radius);cursor:pointer;transition:background 0.15s}
+.user-chip:hover{background:var(--bg4)}
+.avatar{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--pink));display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:#fff;flex-shrink:0}
+.user-info{flex:1;min-width:0}
+.user-name{font-size:12.5px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.user-sub{font-size:10px;color:var(--text3)}
+
+/* TOP BAR */
+.topbar{height:54px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 16px;gap:12px;flex-shrink:0}
+.topbar-date{font-family:var(--font-serif);font-size:17px;color:var(--text);letter-spacing:-0.3px}
+.topbar-day{font-size:11px;color:var(--text3);margin-top:-2px}
+.spacer{flex:1}
+.view-toggle{display:flex;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.view-btn{padding:5px 12px;font-size:12px;font-weight:500;color:var(--text3);background:transparent;transition:all 0.15s;cursor:pointer}
+.view-btn.active{background:var(--bg5);color:var(--text)}
+.icon-btn{width:32px;height:32px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);display:flex;align-items:center;justify-content:center;font-size:15px;color:var(--text2);transition:all 0.15s;cursor:pointer}
+.icon-btn:hover{background:var(--bg4);color:var(--text)}
+
+/* CALENDAR */
+.calendar-area{flex:1;overflow:auto;padding:16px}
+.week-grid{display:grid;grid-template-columns:48px repeat(7,1fr);gap:0;border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;background:var(--bg2);min-height:600px}
+.week-header{display:contents}
+.week-day-header{padding:10px 6px;text-align:center;border-bottom:1px solid var(--border);border-right:1px solid var(--border);background:var(--bg3)}
+.week-day-header:last-child{border-right:none}
+.week-day-label{font-size:10px;font-weight:600;letter-spacing:0.5px;text-transform:uppercase;color:var(--text3)}
+.week-day-num{font-size:20px;font-weight:300;color:var(--text);margin-top:2px;font-family:var(--font-serif)}
+.week-day-num.today{color:var(--accent2);font-weight:600}
+.time-col{border-right:1px solid var(--border);position:relative}
+.time-slot{height:48px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;padding:3px 4px 0}
+.time-label{font-size:9.5px;color:var(--text3);white-space:nowrap}
+.day-col{position:relative;border-right:1px solid var(--border)}
+.day-col:last-child{border-right:none}
+.hour-line{height:48px;border-bottom:1px solid var(--border)}
+.cal-event{position:absolute;left:3px;right:3px;border-radius:6px;padding:4px 7px;font-size:11px;font-weight:500;overflow:hidden;cursor:pointer;z-index:1;transition:filter 0.15s}
+.cal-event:hover{filter:brightness(1.15)}
+.cal-event.study{background:rgba(124,106,247,0.25);border-left:3px solid var(--accent);color:var(--accent2)}
+.cal-event.gym{background:rgba(52,216,154,0.2);border-left:3px solid var(--green);color:var(--green)}
+.cal-event.exam{background:rgba(255,95,107,0.2);border-left:3px solid var(--red);color:var(--red)}
+.cal-event.class{background:rgba(78,168,232,0.2);border-left:3px solid var(--blue);color:var(--blue)}
+.cal-event.break{background:rgba(245,166,35,0.15);border-left:3px solid var(--amber);color:var(--amber)}
+.cal-event.personal{background:rgba(240,98,146,0.2);border-left:3px solid var(--pink);color:var(--pink)}
+.event-title{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.event-time{font-size:9.5px;opacity:0.7}
+
+/* TODAY VIEW */
+.today-view{padding:16px;display:flex;flex-direction:column;gap:12px;overflow-y:auto;height:100%}
+.day-section-label{font-size:10px;font-weight:600;letter-spacing:0.8px;text-transform:uppercase;color:var(--text3);padding:4px 0 8px}
+.timeline{display:flex;flex-direction:column;gap:2px}
+.timeline-item{display:flex;align-items:stretch;gap:12px;min-height:52px}
+.tl-time{width:42px;flex-shrink:0;font-size:10.5px;color:var(--text3);padding-top:4px;text-align:right}
+.tl-line-col{display:flex;flex-direction:column;align-items:center;width:16px;flex-shrink:0}
+.tl-dot{width:10px;height:10px;border-radius:50%;border:2px solid var(--accent);background:var(--bg);margin-top:5px;flex-shrink:0}
+.tl-dot.done{background:var(--accent);border-color:var(--accent)}
+.tl-dot.now{background:var(--green);border-color:var(--green);box-shadow:0 0 8px var(--green)}
+.tl-vert{flex:1;width:1px;background:var(--border);margin-top:2px}
+.tl-card{flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:10px 12px;margin-bottom:4px;transition:border-color 0.15s;cursor:pointer}
+.tl-card:hover{border-color:var(--border2)}
+.tl-card.active{border-color:var(--accent);background:var(--accent-bg)}
+.tl-card-title{font-size:13.5px;font-weight:500;color:var(--text)}
+.tl-card-sub{font-size:11.5px;color:var(--text3);margin-top:2px}
+.tl-card-tags{display:flex;gap:5px;margin-top:6px;flex-wrap:wrap}
+.tag{font-size:10px;padding:2px 7px;border-radius:99px;font-weight:500}
+.tag-study{background:var(--accent-bg);color:var(--accent2)}
+.tag-gym{background:var(--green-bg);color:var(--green)}
+.tag-exam{background:var(--red-bg);color:var(--red)}
+.tag-class{background:var(--blue-bg);color:var(--blue)}
+.tag-break{background:var(--amber-bg);color:var(--amber)}
+.tag-prio-high{background:var(--red-bg);color:var(--red)}
+.tag-prio-med{background:var(--amber-bg);color:var(--amber)}
+.task-check{width:16px;height:16px;border-radius:4px;border:1.5px solid var(--border2);background:transparent;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px;color:transparent;transition:all 0.15s;margin-top:4px}
+.task-check.checked{background:var(--accent);border-color:var(--accent);color:#fff}
+
+/* AI CHAT PANEL */
+.chat-panel-header{padding:14px 14px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.ai-avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--pink));display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.chat-header-info{flex:1}
+.chat-header-name{font-size:13.5px;font-weight:600;color:var(--text)}
+.chat-header-status{font-size:10.5px;color:var(--green);display:flex;align-items:center;gap:4px}
+.status-dot{width:6px;height:6px;border-radius:50%;background:var(--green)}
+.chat-messages{flex:1;overflow-y:auto;padding:12px 12px;display:flex;flex-direction:column;gap:10px}
+.msg{max-width:88%;display:flex;flex-direction:column;gap:3px}
+.msg.ai{align-self:flex-start}
+.msg.user{align-self:flex-end}
+.msg-bubble{padding:9px 12px;border-radius:14px;font-size:12.5px;line-height:1.55}
+.msg.ai .msg-bubble{background:var(--bg3);border:1px solid var(--border);color:var(--text);border-bottom-left-radius:4px}
+.msg.user .msg-bubble{background:var(--accent);color:#fff;border-bottom-right-radius:4px}
+.msg-time{font-size:9.5px;color:var(--text3)}
+.msg.user .msg-time{text-align:right}
+.chat-input-area{padding:10px 10px;border-top:1px solid var(--border)}
+.chat-input-row{display:flex;gap:7px;align-items:flex-end}
+.chat-input{flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:9px 12px;color:var(--text);font-size:12.5px;resize:none;max-height:100px;min-height:38px;transition:border-color 0.15s}
+.chat-input:focus{outline:none;border-color:var(--accent)}
+.chat-input::placeholder{color:var(--text3)}
+.send-btn{width:36px;height:36px;background:var(--accent);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;color:#fff;transition:all 0.15s;flex-shrink:0}
+.send-btn:hover{background:var(--accent2)}
+.send-btn:disabled{opacity:0.4;cursor:not-allowed}
+.typing-indicator{display:flex;gap:3px;align-items:center;padding:8px 12px}
+.typing-dot{width:5px;height:5px;border-radius:50%;background:var(--text3);animation:typing 1.2s infinite}
+.typing-dot:nth-child(2){animation-delay:0.2s}
+.typing-dot:nth-child(3){animation-delay:0.4s}
+@keyframes typing{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-4px)}}
+.chat-mode-tabs{display:flex;padding:8px 10px 0;gap:5px}
+.chat-tab{padding:4px 10px;font-size:11px;font-weight:500;border-radius:99px;cursor:pointer;transition:all 0.15s;color:var(--text3);background:transparent;border:1px solid transparent}
+.chat-tab.active{background:var(--accent-bg);color:var(--accent2);border-color:var(--accent)}
+.chat-tab:hover:not(.active){background:var(--bg4);color:var(--text2)}
+
+/* INSIGHTS SIDEBAR WIDGET */
+.insights-section{padding:10px 12px;border-bottom:1px solid var(--border)}
+.insights-label{font-size:10px;font-weight:600;letter-spacing:0.6px;text-transform:uppercase;color:var(--text3);margin-bottom:8px}
+.insight-card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:10px 12px;margin-bottom:6px}
+.insight-row{display:flex;align-items:center;gap:8px;margin-bottom:4px}
+.insight-icon{font-size:18px}
+.insight-title{font-size:12px;font-weight:500;color:var(--text)}
+.insight-val{margin-left:auto;font-size:12px;font-weight:600;color:var(--accent2)}
+.progress-bar{height:4px;background:var(--bg4);border-radius:99px;overflow:hidden;margin-top:4px}
+.progress-fill{height:100%;border-radius:99px;transition:width 0.6s ease}
+
+/* MODALS */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.75);backdrop-filter:blur(4px);z-index:1000;display:flex;align-items:center;justify-content:center;padding:16px}
+.modal{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-xl);width:100%;max-width:460px;max-height:90vh;overflow-y:auto;animation:modal-in 0.22s ease}
+@keyframes modal-in{from{opacity:0;transform:scale(0.95) translateY(10px)}to{opacity:1;transform:none}}
+.modal-header{padding:20px 20px 14px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:12px}
+.modal-icon{width:36px;height:36px;border-radius:10px;background:var(--accent-bg);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.modal-title{font-size:17px;font-weight:600;color:var(--text);font-family:var(--font-serif)}
+.modal-sub{font-size:12px;color:var(--text3);margin-top:2px}
+.modal-body{padding:16px 20px;display:flex;flex-direction:column;gap:14px}
+.modal-footer{padding:12px 20px 18px;display:flex;gap:8px;justify-content:flex-end}
+.form-group{display:flex;flex-direction:column;gap:5px}
+.form-label{font-size:12px;font-weight:500;color:var(--text2)}
+.form-input{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:9px 12px;color:var(--text);font-size:13px;transition:border-color 0.15s;width:100%}
+.form-input:focus{outline:none;border-color:var(--accent)}
+.form-input::placeholder{color:var(--text3)}
+.form-select{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:9px 12px;color:var(--text);font-size:13px;width:100%;cursor:pointer}
+.form-hint{font-size:11px;color:var(--text3)}
+.form-hint a{color:var(--accent2);text-decoration:none}
+.btn-primary{background:var(--accent);color:#fff;padding:9px 18px;border-radius:var(--radius);font-size:13px;font-weight:500;transition:all 0.15s}
+.btn-primary:hover{background:var(--accent2)}
+.btn-ghost{background:transparent;color:var(--text2);border:1px solid var(--border);padding:9px 18px;border-radius:var(--radius);font-size:13px;font-weight:500;transition:all 0.15s}
+.btn-ghost:hover{background:var(--bg4);color:var(--text)}
+.btn-danger{background:var(--red-bg);color:var(--red);border:1px solid var(--red-bg);padding:9px 18px;border-radius:var(--radius);font-size:13px;font-weight:500;transition:all 0.15s}
+.btn-danger:hover{background:rgba(255,95,107,0.25)}
+.key-display{font-family:monospace;font-size:12px;background:var(--bg4);border:1px solid var(--border);border-radius:6px;padding:8px 12px;color:var(--green);word-break:break-all}
+.provider-pills{display:flex;gap:6px}
+.provider-pill{flex:1;padding:8px;border:1px solid var(--border);border-radius:var(--radius);text-align:center;cursor:pointer;transition:all 0.15s;font-size:12px;font-weight:500;color:var(--text3)}
+.provider-pill.active{border-color:var(--accent);color:var(--accent2);background:var(--accent-bg)}
+
+/* TASK LIST */
+.tasks-section{padding:10px 12px 0;flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:2px}
+.task-item{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:var(--radius);border:1px solid transparent;transition:all 0.15s;cursor:pointer}
+.task-item:hover{background:var(--bg3);border-color:var(--border)}
+.task-item.done-task .task-title{text-decoration:line-through;color:var(--text3)}
+.task-title{font-size:12.5px;color:var(--text);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.task-meta{font-size:10.5px;color:var(--text3)}
+.prio-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.prio-5,.prio-4{background:var(--red)}
+.prio-3{background:var(--amber)}
+.prio-2,.prio-1{background:var(--text3)}
+
+/* ONBOARDING */
+.onboard-progress{display:flex;gap:4px;padding:16px 20px 0}
+.onboard-step-dot{height:3px;border-radius:99px;flex:1;background:var(--border);transition:background 0.3s}
+.onboard-step-dot.done{background:var(--accent)}
+.onboard-step-dot.active{background:var(--accent2)}
+.onboard-step-content{padding:16px 20px;min-height:180px}
+.onboard-title{font-family:var(--font-serif);font-size:20px;color:var(--text);margin-bottom:6px}
+.onboard-sub{font-size:13px;color:var(--text3);margin-bottom:18px}
+.radio-group{display:flex;flex-direction:column;gap:7px}
+.radio-opt{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--border);border-radius:var(--radius);cursor:pointer;transition:all 0.15s}
+.radio-opt:hover{border-color:var(--border2);background:var(--bg3)}
+.radio-opt.selected{border-color:var(--accent);background:var(--accent-bg)}
+.radio-icon{font-size:20px;width:24px;text-align:center}
+.radio-label{font-size:13px;font-weight:500;color:var(--text)}
+.radio-desc{font-size:11px;color:var(--text3)}
+
+/* STATS CHIPS */
+.stats-bar{display:flex;gap:8px;padding:0 16px 12px;flex-wrap:wrap}
+.stat-chip{background:var(--bg3);border:1px solid var(--border);border-radius:99px;padding:5px 12px;font-size:11.5px;color:var(--text2);display:flex;align-items:center;gap:5px}
+.stat-chip .stat-val{font-weight:600;color:var(--text)}
+.stat-chip .stat-icon{font-size:13px}
+
+/* MOBILE */
+@media(max-width:768px){
+  .sidebar{display:none}
+  .right-panel{display:none}
+  .app-shell{flex-direction:column}
+  .main-panel{height:100%}
+  .mobile-nav{display:flex!important}
+  .topbar{height:50px;padding:0 12px}
+  .topbar-date{font-size:15px}
+  .calendar-area{padding:8px}
+  .week-grid{grid-template-columns:36px repeat(7,1fr)}
+  .week-day-label{font-size:9px}
+  .week-day-num{font-size:16px}
+  .cal-event{font-size:9.5px;padding:2px 4px}
+}
+.mobile-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--bg2);border-top:1px solid var(--border);z-index:100;padding:8px 0 calc(8px + env(safe-area-inset-bottom))}
+.mobile-nav-items{display:flex;justify-content:space-around}
+.mob-nav-item{display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px 12px;cursor:pointer;color:var(--text3);font-size:10px;font-weight:500;transition:color 0.15s}
+.mob-nav-item.active{color:var(--accent2)}
+.mob-nav-icon{font-size:20px}
+
+/* FAB */
+.fab{position:fixed;bottom:80px;right:16px;width:48px;height:48px;background:var(--accent);border-radius:50%;display:none;align-items:center;justify-content:center;font-size:22px;color:#fff;box-shadow:var(--shadow);z-index:99;cursor:pointer;transition:transform 0.15s}
+.fab:active{transform:scale(0.92)}
+@media(max-width:768px){.fab{display:flex}}
+
+/* TOOLTIP / EMPTY STATES */
+.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:40px 20px;color:var(--text3);text-align:center}
+.empty-icon{font-size:36px}
+.empty-title{font-size:14px;font-weight:500;color:var(--text2)}
+.empty-sub{font-size:12px}
+
+/* QUICK INPUT */
+.quick-input-bar{padding:10px 16px;border-bottom:1px solid var(--border);display:flex;gap:8px;align-items:center}
+.quick-input{flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:24px;padding:8px 16px;color:var(--text);font-size:13px;transition:all 0.15s}
+.quick-input:focus{outline:none;border-color:var(--accent);background:var(--bg2)}
+.quick-input::placeholder{color:var(--text3)}
+.quick-submit{background:var(--accent);color:#fff;border-radius:20px;padding:7px 14px;font-size:12.5px;font-weight:500;white-space:nowrap;transition:background 0.15s}
+.quick-submit:hover{background:var(--accent2)}
+.loading-spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 0.7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* SUGGESTION CHIPS */
+.suggestion-chips{display:flex;gap:5px;flex-wrap:wrap;padding:0 12px 8px}
+.sug-chip{font-size:10.5px;background:var(--bg4);border:1px solid var(--border);border-radius:99px;padding:4px 10px;color:var(--text3);cursor:pointer;transition:all 0.15s;white-space:nowrap}
+.sug-chip:hover{border-color:var(--accent);color:var(--accent2);background:var(--accent-bg)}
+
+/* NOTIFICATION */
+.notif{position:fixed;top:16px;right:16px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-lg);padding:12px 16px;font-size:12.5px;color:var(--text);max-width:280px;z-index:2000;animation:notif-in 0.25s ease}
+.notif-title{font-weight:600;margin-bottom:2px}
+.notif-sub{color:var(--text3);font-size:11.5px}
+.notif.success{border-color:var(--green);border-left:3px solid var(--green)}
+.notif.error{border-color:var(--red);border-left:3px solid var(--red)}
+.notif.info{border-color:var(--accent);border-left:3px solid var(--accent)}
+@keyframes notif-in{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const {useState,useEffect,useRef,useCallback,useMemo}=React;
+
+// ===================== CONSTANTS =====================
+const STORAGE_KEYS={PREFS:'cc_prefs',EVENTS:'cc_events',TASKS:'cc_tasks',MSGS:'cc_msgs'};
+const DAYS=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const HOURS=Array.from({length:17},(_, i)=>i+6);// 6am-10pm
+const SAMPLE_EVENTS=[
+  {id:'e1',title:'Calculus Lecture',type:'fixed',category:'class',startTime:getDateStr(1,8,0),endTime:getDateStr(1,9,30),allDay:false,color:'blue',aiGenerated:false},
+  {id:'e2',title:'Study Session: Linear Algebra',type:'ai-generated',category:'study',startTime:getDateStr(1,10,0),endTime:getDateStr(1,12,0),allDay:false,color:'accent',aiGenerated:true},
+  {id:'e3',title:'Gym – Upper Body',type:'recurring',category:'gym',startTime:getDateStr(1,13,0),endTime:getDateStr(1,14,0),allDay:false,color:'green',aiGenerated:false},
+  {id:'e4',title:'Lunch Break',type:'fixed',category:'break',startTime:getDateStr(1,14,0),endTime:getDateStr(1,14,30),allDay:false,color:'amber',aiGenerated:false},
+  {id:'e5',title:'Physics: Problem Sets',type:'ai-generated',category:'study',startTime:getDateStr(1,15,0),endTime:getDateStr(1,16,30),allDay:false,color:'accent',aiGenerated:true},
+  {id:'e6',title:'Math Exam',type:'fixed',category:'exam',startTime:getDateStr(3,11,0),endTime:getDateStr(3,13,0),allDay:false,color:'red',aiGenerated:false},
+  {id:'e7',title:'Study: Exam Review',type:'ai-generated',category:'study',startTime:getDateStr(2,9,0),endTime:getDateStr(2,11,0),allDay:false,color:'accent',aiGenerated:true},
+  {id:'e8',title:'Chemistry Lab',type:'fixed',category:'class',startTime:getDateStr(2,13,0),endTime:getDateStr(2,15,0),allDay:false,color:'blue',aiGenerated:false},
+  {id:'e9',title:'Evening Review',type:'ai-generated',category:'study',startTime:getDateStr(0,19,0),endTime:getDateStr(0,20,30),allDay:false,color:'accent',aiGenerated:true},
+  {id:'e10',title:'Gym – Cardio',type:'recurring',category:'gym',startTime:getDateStr(3,7,0),endTime:getDateStr(3,8,0),allDay:false,color:'green',aiGenerated:false},
+];
+const SAMPLE_TASKS=[
+  {id:'t1',title:'Complete Linear Algebra Problem Set 3',subject:'Mathematics',type:'assignment',priority:4,status:'todo',estimatedMinutes:90,deadline:getDateStr(2,23,59),tags:['math'],aiGenerated:false,createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()},
+  {id:'t2',title:'Read Physics Chapter 7 & 8',subject:'Physics',type:'study',priority:3,status:'todo',estimatedMinutes:60,deadline:getDateStr(1,23,59),tags:['physics'],aiGenerated:true,createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()},
+  {id:'t3',title:'Write Chemistry Lab Report',subject:'Chemistry',type:'assignment',priority:5,status:'in-progress',estimatedMinutes:120,deadline:getDateStr(0,23,59),tags:['chem'],aiGenerated:false,createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()},
+  {id:'t4',title:'Review Calculus formulas',subject:'Mathematics',type:'study',priority:5,status:'todo',estimatedMinutes:45,deadline:getDateStr(2,10,0),tags:['math','exam-prep'],aiGenerated:true,createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()},
+  {id:'t5',title:'Gym session',subject:null,type:'gym',priority:2,status:'done',estimatedMinutes:60,tags:['health'],aiGenerated:false,createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()},
+];
+const INITIAL_MSGS=[
+  {id:'m1',role:'ai',content:'👋 Привіт! Я ChronoCoach — твій AI-планувальник. Розкажи що у тебе на горизонті: іспити, заняття, тренування — і я побудую розумний розклад.',time:fmtTime(new Date())},
+  {id:'m2',role:'ai',content:'Спробуй написати: "У мене іспит з математики в четвер о 11:00. Тренажерний зал пн/ср/пт о 7 ранку. Створи план підготовки." 📅',time:fmtTime(new Date())},
+];
+const AI_SUGGESTIONS=['Склади план на тиждень','Додай мої тренування','У мене скоро іспит','Що зробити сьогодні?','Переглянь мій розклад'];
+
+function getDateStr(daysFromNow,h,m){
+  const d=new Date();d.setDate(d.getDate()+daysFromNow);d.setHours(h,m,0,0);return d.toISOString();
+}
+function fmtTime(d){return d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}
+function fmtHour(h){return `${h%12||12}${h<12?'am':'pm'}`}
+function getWeekDates(ref){
+  const d=new Date(ref);const day=d.getDay();
+  return Array.from({length:7},(_,i)=>{const x=new Date(d);x.setDate(d.getDate()-day+i);return x});
+}
+function isToday(d){const t=new Date();return d.getDate()===t.getDate()&&d.getMonth()===t.getMonth()&&d.getFullYear()===t.getFullYear()}
+function storage(key){try{return JSON.parse(localStorage.getItem(key))||null}catch{return null}}
+function saveStorage(key,val){try{localStorage.setItem(key,JSON.stringify(val))}catch{}}
+
+// ===================== SYSTEM PROMPT =====================
+function buildSystemPrompt(prefs,events,tasks){
+  return `You are ChronoCoach, an elite AI time-management coach and study planner embedded in a personal scheduling app.
+
+CURRENT USER PREFERENCES:
+${JSON.stringify(prefs||{name:'Student',learningStyle:'visual',peakEnergyTimes:[{start:'09:00',end:'12:00',level:'high'},{start:'15:00',end:'18:00',level:'medium'}],sleepSchedule:{bedtime:'23:00',wakeTime:'07:00',targetHours:8},gymSchedule:{days:['Monday','Wednesday','Friday'],duration:60,preferredTime:'07:00'},breakPreferences:{frequency:50,duration:10,style:'pomodoro'},focusDuration:90},null,2)}
+
+CURRENT DATE/TIME: ${new Date().toISOString()}
+
+EXISTING CALENDAR EVENTS (${(events||[]).length} total): [omitted for brevity]
+EXISTING TASKS (${(tasks||[]).length} total): [omitted for brevity]
+
+YOUR JOB:
+Parse the user message and respond with ONLY a valid JSON object (no markdown, no prose outside JSON):
+{
+  "intent": "schedule|query|prioritize|reschedule|advice|diagnose",
+  "message": "Friendly 1-3 sentence coaching response explaining what you did",
+  "events": [
+    {
+      "id": "new_[timestamp]",
+      "title": "string",
+      "type": "fixed|flexible|ai-generated|recurring",
+      "category": "study|exam|gym|break|class|personal|sleep",
+      "startTime": "ISO8601",
+      "endTime": "ISO8601",
+      "allDay": false,
+      "color": "blue|green|amber|red|accent|pink",
+      "aiGenerated": true,
+      "notes": "optional tip"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "new_[timestamp]",
+      "title": "string",
+      "subject": "string or null",
+      "type": "study|assignment|exam|gym|break|personal|reminder",
+      "priority": 1-5,
+      "status": "todo",
+      "estimatedMinutes": number,
+      "deadline": "ISO8601 or null",
+      "tags": ["string"],
+      "aiGenerated": true
+    }
+  ],
+  "suggestions": ["coaching tip 1", "coaching tip 2"],
+  "warnings": ["conflict: event X overlaps Y"]
+}
+
+SCHEDULING RULES:
+1. Never schedule during sleep hours (23:00-07:00 by default).
+2. Hard topics → peak energy slots (morning). Review/light work → afternoon.
+3. Insert 10-min break every 50 mins of study.
+4. Space exam prep: work backwards from exam date, daily sessions.
+5. If user says "I have an exam" → create study plan sessions + reminder task.
+6. Always use ISO8601 datetimes. Today is ${new Date().toISOString()}.
+7. If unclear, set intent="query" and ask ONE clarifying question in "message". Keep events/tasks arrays empty.
+8. Respond ONLY with the JSON object — no surrounding text, no markdown fences.`;
+}
+
+// ===================== API CALL =====================
+async function callAI(userMsg,prefs,events,tasks){
+  const key=prefs?.apiKey;
+  const provider=prefs?.apiProvider||'anthropic';
+  if(!key)return{message:"⚠️ No API key set. Click the ⚙️ Settings button to add your API key.",events:[],tasks:[],suggestions:[],warnings:[],intent:'advice'};
+  
+  const systemPrompt=buildSystemPrompt(prefs,events,tasks);
+  
+  try{
+    if(provider==='gemini'){
+      const model='gemini-2.0-flash';
+      const url=`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`;
+      const res=await fetch(url,{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({
+          system_instruction:{parts:[{text:systemPrompt}]},
+          contents:[{role:'user',parts:[{text:userMsg}]}],
+          generationConfig:{responseMimeType:'application/json',temperature:0.4,maxOutputTokens:2000}
+        })
+      });
+      const data=await res.json();
+      if(data.error)return{message:`Gemini Error: ${data.error.message}`,events:[],tasks:[],suggestions:[],warnings:[],intent:'advice'};
+      const text=data.candidates?.[0]?.content?.parts?.[0]?.text||'{}';
+      return JSON.parse(text.replace(/```json|```/g,'').trim());
+    } else if(provider==='anthropic'){
+      const res=await fetch('https://api.anthropic.com/v1/messages',{
+        method:'POST',
+        headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01'},
+        body:JSON.stringify({model:'claude-opus-4-5',max_tokens:2000,system:systemPrompt,messages:[{role:'user',content:userMsg}]})
+      });
+      const data=await res.json();
+      if(data.error)return{message:`API Error: ${data.error.message}`,events:[],tasks:[],suggestions:[],warnings:[],intent:'advice'};
+      const text=data.content?.[0]?.text||'{}';
+      return JSON.parse(text.replace(/```json|```/g,'').trim());
+    } else {
+      const res=await fetch('https://api.openai.com/v1/chat/completions',{
+        method:'POST',
+        headers:{'Content-Type':'application/json','Authorization':`Bearer ${key}`},
+        body:JSON.stringify({model:'gpt-4o',max_tokens:2000,response_format:{type:'json_object'},messages:[{role:'system',content:systemPrompt},{role:'user',content:userMsg}]})
+      });
+      const data=await res.json();
+      if(data.error)return{message:`API Error: ${data.error.message}`,events:[],tasks:[],suggestions:[],warnings:[],intent:'advice'};
+      return JSON.parse(data.choices?.[0]?.message?.content||'{}');
+    }
+  }catch(e){
+    return{message:`Помилка: ${e.message}. Перевір API ключ у Налаштуваннях ⚙️`,events:[],tasks:[],suggestions:[],warnings:[],intent:'advice'};
+  }
+}
+
+// ===================== SETTINGS MODAL =====================
+function SettingsModal({prefs,onSave,onClose}){
+  const [key,setKey]=useState(prefs?.apiKey||'');
+  const [provider,setProvider]=useState(prefs?.apiProvider||'anthropic');
+  const [name,setName]=useState(prefs?.name||'');
+  const [show,setShow]=useState(false);
+  const hasKey=key.length>8;
+  const masked=hasKey?`${key.slice(0,8)}${'•'.repeat(Math.min(key.length-8,20))}`:'';
+  return(
+    <div className="modal-overlay" onClick={e=>e.target===e.currentTarget&&onClose()}>
+      <div className="modal">
+        <div className="modal-header">
+          <div className="modal-icon">⚙️</div>
+          <div><div className="modal-title">Settings</div><div className="modal-sub">Configure your AI provider & preferences</div></div>
+        </div>
+        <div className="modal-body">
+          <div className="form-group">
+            <label className="form-label">Your name</label>
+            <input className="form-input" placeholder="e.g. Alex" value={name} onChange={e=>setName(e.target.value)}/>
+          </div>
+          <div className="form-group">
+            <label className="form-label">AI Provider</label>
+            <div className="provider-pills" style={{flexWrap:'wrap'}}>
+              <div className={`provider-pill${provider==='gemini'?' active':''}`} onClick={()=>setProvider('gemini')} style={{position:'relative'}}>
+                🔵 Google Gemini
+                <span style={{position:'absolute',top:-7,right:4,fontSize:9,background:'var(--green)',color:'#000',padding:'1px 5px',borderRadius:99,fontWeight:700}}>FREE</span>
+              </div>
+              <div className={`provider-pill${provider==='anthropic'?' active':''}`} onClick={()=>setProvider('anthropic')}>🟣 Anthropic Claude</div>
+              <div className={`provider-pill${provider==='openai'?' active':''}`} onClick={()=>setProvider('openai')}>🟢 OpenAI GPT-4</div>
+            </div>
+          </div>
+          {provider==='gemini'&&(
+            <div style={{background:'rgba(52,216,154,0.08)',border:'1px solid rgba(52,216,154,0.3)',borderRadius:'var(--radius)',padding:'10px 12px'}}>
+              <div style={{fontSize:'12px',fontWeight:600,color:'var(--green)',marginBottom:4}}>✅ Gemini Flash — безкоштовно!</div>
+              <div style={{fontSize:'11px',color:'var(--text3)',lineHeight:1.6}}>
+                1. Зайди на <a href="https://aistudio.google.com/apikey" target="_blank" style={{color:'var(--blue)'}}>aistudio.google.com/apikey</a><br/>
+                2. Натисни <b style={{color:'var(--text2)'}}>«Create API Key»</b><br/>
+                3. Скопіюй ключ і встав нижче<br/>
+                <span style={{color:'var(--green)'}}>Ліміт: 15 запитів/хв, 1500/день — більш ніж достатньо 🎉</span>
+              </div>
+            </div>
+          )}
+          <div className="form-group">
+            <label className="form-label">API Key</label>
+            <div style={{display:'flex',gap:'6px'}}>
+              <input className="form-input" type={show?'text':'password'}
+                placeholder={provider==='gemini'?'AIza...':provider==='anthropic'?'sk-ant-api03-...':'sk-proj-...'}
+                value={key} onChange={e=>setKey(e.target.value)} style={{flex:1}}/>
+              <button className="icon-btn" onClick={()=>setShow(s=>!s)} style={{border:'1px solid var(--border)'}}>{show?'🙈':'👁️'}</button>
+            </div>
+            {hasKey&&<div className="key-display">{masked}</div>}
+            <div className="form-hint">
+              {provider==='gemini'
+                ?<>Ключ з <a href="https://aistudio.google.com/apikey" target="_blank">Google AI Studio</a>. Зберігається тільки в твоєму браузері.</>
+                :provider==='anthropic'
+                ?<>Ключ з <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a>. Зберігається тільки в твоєму браузері.</>
+                :<>Ключ з <a href="https://platform.openai.com/api-keys" target="_blank">platform.openai.com</a>. Зберігається тільки в твоєму браузері.</>}
+            </div>
+          </div>
+          <div style={{background:'var(--bg3)',border:'1px solid var(--border)',borderRadius:'var(--radius)',padding:'10px 12px'}}>
+            <div style={{fontSize:'12px',fontWeight:600,color:'var(--text2)',marginBottom:6}}>👩‍💻 Хочеш поділитися з подругою?</div>
+            <div style={{fontSize:'11px',color:'var(--text3)',lineHeight:1.7}}>
+              Просто відправ їй посилання <b style={{color:'var(--accent2)'}}>chronocoach-nine.vercel.app</b> — вона відкриє у браузері, пройде онбординг і введе <b style={{color:'var(--green)'}}>свій власний</b> безкоштовний Gemini ключ. Кожен зберігає ключ у себе в браузері — ніякого шарингу не треба!
+            </div>
+          </div>
+          <div style={{background:'var(--amber-bg)',border:'1px solid rgba(245,166,35,0.3)',borderRadius:'var(--radius)',padding:'10px 12px'}}>
+            <div style={{fontSize:'11.5px',color:'var(--amber)',fontWeight:500}}>🔒 Security note</div>
+            <div style={{fontSize:'11px',color:'var(--text3)',marginTop:'3px',lineHeight:1.5}}>Your API key is stored only in <code style={{fontSize:'10.5px',background:'rgba(0,0,0,0.3)',padding:'1px 4px',borderRadius:'3px'}}>localStorage</code> and never sent to any server other than the AI provider directly from your browser.</div>
+          </div>
+        </div>
+        <div className="modal-footer">
+          <button className="btn-ghost" onClick={onClose}>Cancel</button>
+          {key&&<button className="btn-danger" onClick={()=>{setKey('');onSave({...prefs,apiKey:'',apiProvider:provider,name})}}>Remove Key</button>}
+          <button className="btn-primary" onClick={()=>{onSave({...prefs,apiKey:key,apiProvider:provider,name});onClose()}}>Save Settings</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ===================== ONBOARDING MODAL =====================
+function OnboardingModal({onComplete}){
+  const [step,setStep]=useState(0);
+  const [data,setData]=useState({name:'',learningStyle:'visual',peakEnergy:'morning',gymDays:['Monday','Wednesday','Friday'],sleepHours:8});
+  const steps=[
+    {
+      title:"Welcome to ChronoCoach",
+      sub:"Your AI-powered study planner. Let's personalize it for you in 60 seconds.",
+      content:<div style={{textAlign:'center',paddingTop:8}}>
+        <div style={{fontSize:52,marginBottom:12}}>🧠</div>
+        <input className="form-input" placeholder="What's your name?" value={data.name} onChange={e=>setData(d=>({...d,name:e.target.value}))} style={{textAlign:'center'}}/>
+        <div style={{fontSize:12,color:'var(--text3)',marginTop:8}}>I'll use this to personalize your coaching experience</div>
+      </div>
+    },
+    {
+      title:"How do you learn best?",
+      sub:"This helps me choose the right study techniques for you.",
+      content:<div className="radio-group">
+        {[['visual','👁️','Visual','Diagrams, charts, color-coding'],['reading-writing','📖','Reading/Writing','Notes, summaries, written plans'],['kinesthetic','🏃','Active/Kinesthetic','Practice problems, hands-on tasks'],['auditory','🎧','Auditory','Talking through concepts, recordings']].map(([v,icon,label,desc])=>(
+          <div key={v} className={`radio-opt${data.learningStyle===v?' selected':''}`} onClick={()=>setData(d=>({...d,learningStyle:v}))}>
+            <div className="radio-icon">{icon}</div>
+            <div><div className="radio-label">{label}</div><div style={{fontSize:11,color:'var(--text3)'}}>{desc}</div></div>
+          </div>
+        ))}
+      </div>
+    },
+    {
+      title:"When are you most focused?",
+      sub:"I'll schedule your hardest tasks during peak brain hours.",
+      content:<div className="radio-group">
+        {[['morning','🌅','Morning person','Peak focus 6am–12pm'],['afternoon','☀️','Afternoon','Peak focus 12pm–6pm'],['evening','🌙','Night owl','Peak focus after 6pm'],['variable','⚡','Variable','It changes day to day']].map(([v,icon,label,desc])=>(
+          <div key={v} className={`radio-opt${data.peakEnergy===v?' selected':''}`} onClick={()=>setData(d=>({...d,peakEnergy:v}))}>
+            <div className="radio-icon">{icon}</div>
+            <div><div className="radio-label">{label}</div><div style={{fontSize:11,color:'var(--text3)'}}>{desc}</div></div>
+          </div>
+        ))}
+      </div>
+    },
+    {
+      title:"How many hours of sleep?",
+      sub:"I'll protect your sleep schedule when building your plan.",
+      content:<div style={{textAlign:'center',paddingTop:16}}>
+        <div style={{fontSize:56,fontFamily:'var(--font-serif)',fontWeight:300,color:'var(--accent2)',marginBottom:8}}>{data.sleepHours}h</div>
+        <input type="range" min={5} max={10} step={0.5} value={data.sleepHours} onChange={e=>setData(d=>({...d,sleepHours:+e.target.value}))} style={{width:'80%',accentColor:'var(--accent)'}}/>
+        <div style={{display:'flex',justifyContent:'space-between',width:'80%',margin:'4px auto 0',fontSize:11,color:'var(--text3)'}}>
+          <span>5h</span><span>7–9h recommended</span><span>10h</span>
+        </div>
+      </div>
+    },
+  ];
+  const cur=steps[step];
+  return(
+    <div className="modal-overlay">
+      <div className="modal">
+        <div className="onboard-progress">{steps.map((_,i)=><div key={i} className={`onboard-step-dot${i<step?' done':i===step?' active':''}`}/>)}</div>
+        <div className="onboard-step-content">
+          <div className="onboard-title">{cur.title}</div>
+          <div className="onboard-sub">{cur.sub}</div>
+          {cur.content}
+        </div>
+        <div className="modal-footer">
+          {step>0&&<button className="btn-ghost" onClick={()=>setStep(s=>s-1)}>Back</button>}
+          <div style={{flex:1}}/>
+          {step<steps.length-1
+            ?<button className="btn-primary" onClick={()=>setStep(s=>s+1)} disabled={step===0&&!data.name.trim()}>Next →</button>
+            :<button className="btn-primary" onClick={()=>onComplete(data)}>Start Planning 🚀</button>}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ===================== WEEK CALENDAR =====================
+function WeekCalendar({events,weekDates}){
+  function eventsForDay(date){
+    return events.filter(ev=>{
+      const ed=new Date(ev.startTime);
+      return ed.getDate()===date.getDate()&&ed.getMonth()===date.getMonth()&&ed.getFullYear()===date.getFullYear();
+    });
+  }
+  function eventStyle(ev){
+    const start=new Date(ev.startTime),end=new Date(ev.endTime);
+    const top=(start.getHours()-6)*48+(start.getMinutes()/60)*48;
+    const height=((end-start)/3600000)*48;
+    return{top:`${top}px`,height:`${Math.max(height,20)}px`};
+  }
+  const catClass={study:'study',exam:'exam',gym:'gym',break:'break',class:'class',personal:'personal',sleep:'study'};
+  return(
+    <div className="week-grid">
+      <div style={{background:'var(--bg3)',borderBottom:'1px solid var(--border)',borderRight:'1px solid var(--border)'}}/>
+      {weekDates.map((d,i)=>(
+        <div key={i} className="week-day-header">
+          <div className="week-day-label">{DAYS[d.getDay()]}</div>
+          <div className={`week-day-num${isToday(d)?' today':''}`}>{d.getDate()}</div>
+        </div>
+      ))}
+      <div className="time-col">
+        {HOURS.map(h=>(
+          <div key={h} className="time-slot">
+            <span className="time-label">{fmtHour(h)}</span>
+          </div>
+        ))}
+      </div>
+      {weekDates.map((date,di)=>(
+        <div key={di} className="day-col" style={{position:'relative'}}>
+          {HOURS.map(h=><div key={h} className="hour-line"/>)}
+          {eventsForDay(date).map(ev=>(
+            <div key={ev.id} className={`cal-event ${catClass[ev.category]||'study'}`} style={eventStyle(ev)} title={`${ev.title}\n${fmtTime(new Date(ev.startTime))} – ${fmtTime(new Date(ev.endTime))}`}>
+              <div className="event-title">{ev.title}</div>
+              <div className="event-time">{fmtTime(new Date(ev.startTime))}</div>
+            </div>
+          ))}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ===================== TODAY VIEW =====================
+function TodayView({events,tasks,onToggleTask}){
+  const todayEvents=events
+    .filter(ev=>{const d=new Date(ev.startTime);return isToday(d)})
+    .sort((a,b)=>new Date(a.startTime)-new Date(b.startTime));
+  const now=new Date();
+  const catTag={study:'tag-study',exam:'tag-exam',gym:'tag-gym',break:'tag-break',class:'tag-class',personal:'tag-study'};
+  const catLabel={study:'Study',exam:'Exam',gym:'Gym',break:'Break',class:'Class',personal:'Personal'};
+  if(todayEvents.length===0)return(
+    <div className="today-view">
+      <div className="empty-state">
+        <div className="empty-icon">📅</div>
+        <div className="empty-title">Немає подій сьогодні</div>
+        <div className="empty-sub">Попроси ChronoCoach спланувати твій день!</div>
+      </div>
+    </div>
+  );
+  return(
+    <div className="today-view" style={{paddingBottom:80}}>
+      <div className="day-section-label">Today's Schedule</div>
+      <div className="timeline">
+        {todayEvents.map((ev,i)=>{
+          const start=new Date(ev.startTime),end=new Date(ev.endTime);
+          const isPast=end<now,isCurrent=start<=now&&end>now;
+          const linkedTask=tasks.find(t=>t.linkedEventId===ev.id||ev.linkedTaskId===t.id);
+          return(
+            <div key={ev.id} className="timeline-item">
+              <div className="tl-time">{fmtTime(start)}</div>
+              <div className="tl-line-col">
+                <div className={`tl-dot${isPast?' done':isCurrent?' now':''}`}/>
+                {i<todayEvents.length-1&&<div className="tl-vert"/>}
+              </div>
+              <div className={`tl-card${isCurrent?' active':''}`}>
+                <div style={{display:'flex',alignItems:'center',gap:7}}>
+                  <span className="tl-card-title">{ev.title}</span>
+                  {ev.aiGenerated&&<span style={{fontSize:9,background:'var(--accent-bg)',color:'var(--accent2)',padding:'1px 5px',borderRadius:99,fontWeight:600}}>AI</span>}
+                </div>
+                <div className="tl-card-sub">{fmtTime(start)} – {fmtTime(end)} · {Math.round((end-start)/60000)}min</div>
+                {ev.notes&&<div style={{fontSize:11,color:'var(--text3)',marginTop:4}}>💡 {ev.notes}</div>}
+                <div className="tl-card-tags">
+                  <span className={`tag ${catTag[ev.category]||'tag-study'}`}>{catLabel[ev.category]||ev.category}</span>
+                  {isCurrent&&<span className="tag" style={{background:'rgba(52,216,154,0.15)',color:'var(--green)'}}>● Now</span>}
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+      {tasks.filter(t=>t.status!=='done').length>0&&(
+        <>
+          <div className="day-section-label" style={{marginTop:16}}>Pending Tasks</div>
+          {tasks.filter(t=>t.status!=='done').slice(0,5).map(t=>(
+            <div key={t.id} className={`task-item${t.status==='done'?' done-task':''}`} onClick={()=>onToggleTask(t.id)}>
+              <div className={`prio-dot prio-${t.priority}`}/>
+              <div className={`task-check${t.status==='done'?' checked':''}`}>{t.status==='done'?'✓':''}</div>
+              <div style={{flex:1,minWidth:0}}>
+                <div className="task-title">{t.title}</div>
+                {t.subject&&<div className="task-meta">{t.subject} · {t.estimatedMinutes}min</div>}
+              </div>
+              {t.deadline&&<div style={{fontSize:10,color:'var(--text3)',flexShrink:0}}>{new Date(t.deadline).toLocaleDateString([],{month:'short',day:'numeric'})}</div>}
+            </div>
+          ))}
+        </>
+      )}
+    </div>
+  );
+}
+
+// ===================== INSIGHT WIDGETS =====================
+function InsightWidgets({tasks,events}){
+  const done=tasks.filter(t=>t.status==='done').length;
+  const total=tasks.length;
+  const pct=total?Math.round((done/total)*100):0;
+  const studyMins=events.filter(e=>e.category==='study'&&isToday(new Date(e.startTime))).reduce((a,e)=>{const s=new Date(e.startTime),en=new Date(e.endTime);return a+(en-s)/60000},0);
+  const highPrio=tasks.filter(t=>t.priority>=4&&t.status!=='done').length;
+  return(
+    <div className="insights-section">
+      <div className="insights-label">Today's Progress</div>
+      <div className="insight-card">
+        <div className="insight-row">
+          <span className="insight-icon">✅</span>
+          <span className="insight-title">Tasks completed</span>
+          <span className="insight-val">{done}/{total}</span>
+        </div>
+        <div className="progress-bar"><div className="progress-fill" style={{width:`${pct}%`,background:'var(--accent)'}}/></div>
+      </div>
+      <div className="insight-card">
+        <div className="insight-row">
+          <span className="insight-icon">📚</span>
+          <span className="insight-title">Study time today</span>
+          <span className="insight-val">{Math.round(studyMins)}min</span>
+        </div>
+        <div className="progress-bar"><div className="progress-fill" style={{width:`${Math.min(100,studyMins/180*100)}%`,background:'var(--blue)'}}/></div>
+      </div>
+      {highPrio>0&&(
+        <div className="insight-card" style={{borderColor:'rgba(255,95,107,0.4)'}}>
+          <div className="insight-row">
+            <span className="insight-icon">🔥</span>
+            <span className="insight-title">High priority pending</span>
+            <span className="insight-val" style={{color:'var(--red)'}}>{highPrio}</span>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ===================== NOTIFICATION =====================
+function Notification({notif,onDone}){
+  useEffect(()=>{if(notif){const t=setTimeout(onDone,3500);return()=>clearTimeout(t)}},[notif]);
+  if(!notif)return null;
+  return(
+    <div className={`notif ${notif.type}`}>
+      <div className="notif-title">{notif.title}</div>
+      {notif.sub&&<div className="notif-sub">{notif.sub}</div>}
+    </div>
+  );
+}
+
+// ===================== MAIN APP =====================
+function App(){
+  const [prefs,setPrefs]=useState(()=>storage(STORAGE_KEYS.PREFS));
+  const [events,setEvents]=useState(()=>storage(STORAGE_KEYS.EVENTS)||SAMPLE_EVENTS);
+  const [tasks,setTasks]=useState(()=>storage(STORAGE_KEYS.TASKS)||SAMPLE_TASKS);
+  const [msgs,setMsgs]=useState(()=>storage(STORAGE_KEYS.MSGS)||INITIAL_MSGS);
+  const [view,setView]=useState('week');
+  const [activeTab,setActiveTab]=useState('calendar');
+  const [showSettings,setShowSettings]=useState(false);
+  const [showOnboard,setShowOnboard]=useState(!prefs?.onboardingComplete);
+  const [chatInput,setChatInput]=useState('');
+  const [quickInput,setQuickInput]=useState('');
+  const [isLoading,setIsLoading]=useState(false);
+  const [chatMode,setChatMode]=useState('plan');
+  const [notif,setNotif]=useState(null);
+  const [weekRef,setWeekRef]=useState(new Date());
+  const msgsEndRef=useRef(null);
+
+  useEffect(()=>{saveStorage(STORAGE_KEYS.PREFS,prefs)},[prefs]);
+  useEffect(()=>{saveStorage(STORAGE_KEYS.EVENTS,events)},[events]);
+  useEffect(()=>{saveStorage(STORAGE_KEYS.TASKS,tasks)},[tasks]);
+  useEffect(()=>{saveStorage(STORAGE_KEYS.MSGS,msgs.slice(-50))},[msgs]);
+  useEffect(()=>{msgsEndRef.current?.scrollIntoView({behavior:'smooth'})},[msgs,isLoading]);
+
+  const weekDates=useMemo(()=>getWeekDates(weekRef),[weekRef]);
+
+  function showNotif(title,sub,type='info'){setNotif({title,sub,type})}
+
+  function savePrefs(p){setPrefs({...p,updatedAt:new Date().toISOString()});showNotif('Settings saved','Your preferences have been updated','success')}
+
+  function completeOnboard(data){
+    const p={name:data.name,learningStyle:data.learningStyle,peakEnergyTimes:[{start:data.peakEnergy==='morning'?'08:00':data.peakEnergy==='afternoon'?'13:00':'18:00',end:data.peakEnergy==='morning'?'12:00':data.peakEnergy==='afternoon'?'17:00':'22:00',level:'high'}],sleepSchedule:{bedtime:'23:00',wakeTime:'07:00',targetHours:data.sleepHours},gymSchedule:{days:['Monday','Wednesday','Friday'],duration:60,preferredTime:'07:00'},breakPreferences:{frequency:50,duration:10,style:'pomodoro'},focusDuration:90,onboardingComplete:true,createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),apiKey:'',apiProvider:'anthropic'};
+    setPrefs(p);setShowOnboard(false);
+    setMsgs(m=>[...m,{id:'m-welcome',role:'ai',content:`Привіт, ${data.name}! 🎉 Профіль налаштовано. Зайди в ⚙️ Налаштування і додай безкоштовний Gemini ключ (aistudio.google.com) — і я стану повноцінним AI-планувальником! Або просто досліди демо-календар.`,time:fmtTime(new Date())}]);
+  }
+
+  async function sendChat(text){
+    if(!text.trim()||isLoading)return;
+    const userMsg={id:`m${Date.now()}`,role:'user',content:text,time:fmtTime(new Date())};
+    setMsgs(m=>[...m,userMsg]);setChatInput('');setIsLoading(true);
+    try{
+      const resp=await callAI(text,prefs,events,tasks);
+      const aiMsg={id:`m${Date.now()+1}`,role:'ai',content:resp.message||'Done!',time:fmtTime(new Date())};
+      setMsgs(m=>[...m,aiMsg]);
+      if(resp.events?.length){
+        const ts=Date.now();
+        const newEvs=resp.events.map((e,i)=>({...e,id:e.id||`ev_${ts}_${i}`,aiGenerated:true}));
+        setEvents(ev=>[...ev,...newEvs]);
+        showNotif('Calendar updated',`Added ${newEvs.length} event${newEvs.length>1?'s':''}!`,'success');
+      }
+      if(resp.tasks?.length){
+        const ts=Date.now();
+        const newTs=resp.tasks.map((t,i)=>({...t,id:t.id||`tk_${ts}_${i}`,aiGenerated:true,createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),status:t.status||'todo',tags:t.tags||[]}));
+        setTasks(ts=>[...ts,...newTs]);
+      }
+      if(resp.warnings?.length)showNotif('⚠️ Scheduling warning',resp.warnings[0],'error');
+    }catch(e){
+      setMsgs(m=>[...m,{id:`me${Date.now()}`,role:'ai',content:`Oops — something went wrong: ${e.message}`,time:fmtTime(new Date())}]);
+    }
+    setIsLoading(false);
+  }
+
+  async function sendQuick(text){
+    if(!text.trim()||isLoading)return;
+    setQuickInput('');
+    await sendChat(text);
+    setActiveTab('calendar');
+  }
+
+  function toggleTask(id){
+    setTasks(ts=>ts.map(t=>t.id===id?{...t,status:t.status==='done'?'todo':'done',updatedAt:new Date().toISOString()}:t));
+  }
+
+  function clearData(){
+    if(window.confirm('Clear all events and tasks? This cannot be undone.')){
+      setEvents([]);setTasks([]);setMsgs(INITIAL_MSGS);
+      showNotif('Data cleared','All events and tasks removed','info');
+    }
+  }
+
+  const hasKey=prefs?.apiKey?.length>8;
+  const userName=prefs?.name||'Student';
+
+  return(
+    <>
+      {showOnboard&&<OnboardingModal onComplete={completeOnboard}/>}
+      {showSettings&&<SettingsModal prefs={prefs} onSave={savePrefs} onClose={()=>setShowSettings(false)}/>}
+      <Notification notif={notif} onDone={()=>setNotif(null)}/>
+
+      <div className="app-shell">
+        {/* SIDEBAR */}
+        <aside className="sidebar">
+          <div className="sidebar-logo">
+            <div className="brand">
+              <div className="logo-mark">⏱</div>
+              <div><div className="brand-name">ChronoCoach</div><div className="brand-tag">AI Study Planner</div></div>
+            </div>
+          </div>
+          <nav className="sidebar-nav">
+            <div className="nav-section-label">Workspace</div>
+            {[['calendar','📅','Calendar',null],['today','⚡','Today',null],['tasks','✅','Tasks',tasks.filter(t=>t.status!=='done').length||null]].map(([id,icon,label,badge])=>(
+              <div key={id} className={`nav-item${activeTab===id?' active':''}`} onClick={()=>setActiveTab(id)}>
+                <span className="icon">{icon}</span>{label}{badge?<span className="badge">{badge}</span>:null}
+              </div>
+            ))}
+            <div className="nav-divider"/>
+            <div className="nav-section-label">AI Features</div>
+            {[['coach','🧠','AI Coach',null],['diagnose','🔍','Self-Diagnose',null]].map(([id,icon,label,badge])=>(
+              <div key={id} className={`nav-item${activeTab===id?' active':''}`} onClick={()=>setActiveTab(id)}>
+                <span className="icon">{icon}</span>{label}{badge?<span className="badge">{badge}</span>:null}
+              </div>
+            ))}
+            <div className="nav-divider"/>
+            <div className="nav-item" onClick={()=>setShowSettings(true)}>
+              <span className="icon">⚙️</span>Settings
+              {!hasKey&&<span className="badge" style={{background:'var(--red)'}}>!</span>}
+            </div>
+            <div className="nav-item" onClick={clearData}><span className="icon">🗑️</span>Clear Data</div>
+          </nav>
+          <div className="sidebar-footer">
+            <div className="user-chip" onClick={()=>setShowSettings(true)}>
+              <div className="avatar">{userName.charAt(0).toUpperCase()}</div>
+              <div className="user-info">
+                <div className="user-name">{userName}</div>
+                <div className="user-sub">{hasKey?`✓ ${prefs?.apiProvider==='gemini'?'Gemini':'AI'} підключено`:'→ Додати ключ'}</div>
+              </div>
+            </div>
+          </div>
+        </aside>
+
+        {/* MAIN PANEL */}
+        <main className="main-panel">
+          {/* TOPBAR */}
+          <div className="topbar">
+            <div>
+              <div className="topbar-date">{new Date().toLocaleDateString([],{weekday:'long',month:'long',day:'numeric'})}</div>
+              <div className="topbar-day" style={{fontSize:10,color:'var(--text3)'}}>Week {Math.ceil(new Date().getDate()/7)}</div>
+            </div>
+            <div className="spacer"/>
+            {activeTab==='calendar'&&(
+              <>
+                <div className="view-toggle">
+                  {['day','week','month'].map(v=><button key={v} className={`view-btn${view===v?' active':''}`} onClick={()=>setView(v)}>{v.charAt(0).toUpperCase()+v.slice(1)}</button>)}
+                </div>
+                <div className="icon-btn" onClick={()=>{const d=new Date(weekRef);d.setDate(d.getDate()-7);setWeekRef(d)}} title="Previous week">‹</div>
+                <div className="icon-btn" onClick={()=>setWeekRef(new Date())} title="Today" style={{fontSize:11,fontWeight:600}}>Now</div>
+                <div className="icon-btn" onClick={()=>{const d=new Date(weekRef);d.setDate(d.getDate()+7);setWeekRef(d)}} title="Next week">›</div>
+              </>
+            )}
+            <div className="icon-btn" onClick={()=>setShowSettings(true)} title="Settings">⚙️</div>
+          </div>
+
+          {/* QUICK INPUT */}
+          <div className="quick-input-bar">
+            <span style={{fontSize:16,flexShrink:0}}>✨</span>
+            <input className="quick-input" placeholder={`Скажи AI що запланувати… напр. "Іспит з матем у п'ятницю о 14:00, створи план підготовки"`} value={quickInput} onChange={e=>setQuickInput(e.target.value)} onKeyDown={e=>e.key==='Enter'&&sendQuick(quickInput)}/>
+            <button className="quick-submit" onClick={()=>sendQuick(quickInput)} disabled={isLoading}>
+              {isLoading?<span className="loading-spinner"/>:'Запланувати →'}
+            </button>
+          </div>
+
+          {/* NO KEY BANNER */}
+          {!hasKey&&(
+            <div style={{margin:'0 16px 8px',background:'rgba(124,106,247,0.1)',border:'1px solid rgba(124,106,247,0.35)',borderRadius:'var(--radius)',padding:'10px 14px',display:'flex',alignItems:'center',gap:10,flexWrap:'wrap'}}>
+              <span style={{fontSize:18}}>🔑</span>
+              <div style={{flex:1,minWidth:160}}>
+                <div style={{fontSize:12.5,fontWeight:600,color:'var(--accent2)'}}>Підключи безкоштовний AI щоб почати</div>
+                <div style={{fontSize:11,color:'var(--text3)'}}>Рекомендуємо Google Gemini — безкоштовно, 1500 запитів/день</div>
+              </div>
+              <button className="btn-primary" style={{fontSize:12,padding:'6px 12px',whiteSpace:'nowrap'}} onClick={()=>setShowSettings(true)}>⚙️ Додати ключ</button>
+            </div>
+          )}
+
+          <div className="suggestion-chips">
+            {AI_SUGGESTIONS.map(s=><span key={s} className="sug-chip" onClick={()=>sendQuick(s)}>{s}</span>)}
+          </div>
+
+          {/* STATS */}
+          <div className="stats-bar">
+            {[['📚',`${events.filter(e=>e.category==='study').length}`,'study sessions'],['✅',`${tasks.filter(t=>t.status==='done').length}/${tasks.length}`,'tasks done'],['🔥',`${tasks.filter(t=>t.priority>=4&&t.status!=='done').length}`,'high priority'],['🤖',`${events.filter(e=>e.aiGenerated).length}`,'AI scheduled']].map(([icon,val,label])=>(
+              <div key={label} className="stat-chip">
+                <span className="stat-icon">{icon}</span>
+                <span className="stat-val">{val}</span>
+                <span>{label}</span>
+              </div>
+            ))}
+          </div>
+
+          {/* CONTENT */}
+          <div style={{flex:1,overflow:'hidden',display:'flex',flexDirection:'column'}}>
+            {activeTab==='calendar'&&(
+              <div className="calendar-area">
+                <WeekCalendar events={events} weekDates={weekDates}/>
+              </div>
+            )}
+            {activeTab==='today'&&(
+              <TodayView events={events} tasks={tasks} onToggleTask={toggleTask}/>
+            )}
+            {activeTab==='tasks'&&(
+              <div style={{padding:16,overflowY:'auto',height:'100%',paddingBottom:80}}>
+                <div className="day-section-label">All Tasks</div>
+                {['todo','in-progress','done'].map(status=>{
+                  const group=tasks.filter(t=>t.status===status);
+                  if(!group.length)return null;
+                  return(
+                    <div key={status} style={{marginBottom:16}}>
+                      <div style={{fontSize:11,fontWeight:600,color:'var(--text3)',textTransform:'uppercase',letterSpacing:'0.6px',padding:'4px 0 8px'}}>{status==='in-progress'?'In Progress':status.charAt(0).toUpperCase()+status.slice(1)} ({group.length})</div>
+                      {group.map(t=>(
+                        <div key={t.id} className={`task-item${t.status==='done'?' done-task':''}`} onClick={()=>toggleTask(t.id)}>
+                          <div className={`prio-dot prio-${t.priority}`}/>
+                          <div className={`task-check${t.status==='done'?' checked':''}`}>{t.status==='done'?'✓':''}</div>
+                          <div style={{flex:1,minWidth:0}}>
+                            <div className="task-title">{t.title}</div>
+                            <div className="task-meta">{t.subject||t.type} · {t.estimatedMinutes}min{t.aiGenerated?' · 🤖 AI':''}</div>
+                          </div>
+                          {t.deadline&&<div style={{fontSize:10,color:'var(--text3)',flexShrink:0}}>{new Date(t.deadline).toLocaleDateString([],{month:'short',day:'numeric'})}</div>}
+                        </div>
+                      ))}
+                    </div>
+                  );
+                })}
+                {tasks.length===0&&<div className="empty-state"><div className="empty-icon">✅</div><div className="empty-title">Поки немає завдань</div><div className="empty-sub">Попроси AI створити план навчання!</div></div>}
+              </div>
+            )}
+            {(activeTab==='coach'||activeTab==='diagnose')&&(
+              <div style={{flex:1,display:'flex',flexDirection:'column',overflow:'hidden',height:'100%'}}>
+                <div style={{padding:'12px 16px 8px',borderBottom:'1px solid var(--border)'}}>
+                  <div style={{fontSize:13,fontWeight:600,color:'var(--text)',marginBottom:2}}>
+                    {activeTab==='coach'?'🧠 AI Coaching Chat':'🔍 Learning Diagnostics'}
+                  </div>
+                  <div style={{fontSize:11,color:'var(--text3)'}}>
+                    {activeTab==='coach'?'Ask about your schedule, priorities, study strategies':"I'll interview you to optimize your schedule"}
+                  </div>
+                </div>
+                <div className="chat-messages" style={{flex:1}}>
+                  {msgs.map(m=>(
+                    <div key={m.id} className={`msg ${m.role==='ai'?'ai':'user'}`}>
+                      <div className="msg-bubble">{m.content}</div>
+                      <div className="msg-time">{m.time}</div>
+                    </div>
+                  ))}
+                  {isLoading&&(
+                    <div className="msg ai">
+                      <div className="msg-bubble" style={{padding:'8px 12px'}}>
+                        <div className="typing-indicator">
+                          <div className="typing-dot"/><div className="typing-dot"/><div className="typing-dot"/>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  <div ref={msgsEndRef}/>
+                </div>
+                <div className="suggestion-chips" style={{paddingTop:6}}>
+                  {['На чому зосередитись сьогодні?','Чи не перевантажена я цього тижня?','Порадь техніку навчання','Скільки часу для навчання сьогодні?'].map(s=>(
+                    <span key={s} className="sug-chip" onClick={()=>sendChat(s)}>{s}</span>
+                  ))}
+                </div>
+                <div className="chat-input-area">
+                  <div className="chat-input-row">
+                    <textarea className="chat-input" rows={1} placeholder="Запитай ChronoCoach що завгодно…" value={chatInput} onChange={e=>setChatInput(e.target.value)} onKeyDown={e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendChat(chatInput)}}}/>
+                    <button className="send-btn" onClick={()=>sendChat(chatInput)} disabled={isLoading||!chatInput.trim()}>
+                      {isLoading?<span className="loading-spinner"/>:'↑'}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </main>
+
+        {/* RIGHT PANEL */}
+        <aside className="right-panel">
+          <div className="chat-panel-header">
+            <div className="ai-avatar">🧠</div>
+            <div className="chat-header-info">
+              <div className="chat-header-name">ChronoCoach AI</div>
+              <div className="chat-header-status"><div className="status-dot"/>{hasKey?`${prefs?.apiProvider==='gemini'?'Gemini Flash':'AI'} готовий`:'Демо режим'}</div>
+            </div>
+            <div className="icon-btn" onClick={()=>setShowSettings(true)} title="API Settings" style={{flexShrink:0}}>⚙️</div>
+          </div>
+          <div className="chat-mode-tabs">
+            {[['plan','📅 Plan'],['coach','💬 Coach'],['diagnose','🔍 Diagnose']].map(([id,label])=>(
+              <button key={id} className={`chat-tab${chatMode===id?' active':''}`} onClick={()=>setChatMode(id)}>{label}</button>
+            ))}
+          </div>
+          <InsightWidgets tasks={tasks} events={events}/>
+          <div className="chat-messages" style={{flex:1}}>
+            {msgs.map(m=>(
+              <div key={m.id} className={`msg ${m.role==='ai'?'ai':'user'}`}>
+                <div className="msg-bubble">{m.content}</div>
+                <div className="msg-time">{m.time}</div>
+              </div>
+            ))}
+            {isLoading&&(
+              <div className="msg ai">
+                <div className="msg-bubble" style={{padding:'8px 12px'}}>
+                  <div className="typing-indicator">
+                    <div className="typing-dot"/><div className="typing-dot"/><div className="typing-dot"/>
+                  </div>
+                </div>
+              </div>
+            )}
+            <div ref={msgsEndRef}/>
+          </div>
+          <div className="suggestion-chips" style={{paddingTop:6}}>
+            {AI_SUGGESTIONS.slice(0,3).map(s=>(
+              <span key={s} className="sug-chip" onClick={()=>sendChat(s)}>{s}</span>
+            ))}
+          </div>
+          <div className="chat-input-area">
+            <div className="chat-input-row">
+              <textarea className="chat-input" rows={1} placeholder="Запитай ChronoCoach…" value={chatInput} onChange={e=>setChatInput(e.target.value)} onKeyDown={e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendChat(chatInput)}}}/>
+              <button className="send-btn" onClick={()=>sendChat(chatInput)} disabled={isLoading||!chatInput.trim()}>
+                {isLoading?<span className="loading-spinner"/>:'↑'}
+              </button>
+            </div>
+          </div>
+        </aside>
+      </div>
+
+      {/* MOBILE NAV */}
+      <nav className="mobile-nav">
+        <div className="mobile-nav-items">
+          {[['calendar','📅','Calendar'],['today','⚡','Today'],['coach','🧠','AI Coach'],['tasks','✅','Tasks']].map(([id,icon,label])=>(
+            <div key={id} className={`mob-nav-item${activeTab===id?' active':''}`} onClick={()=>setActiveTab(id)}>
+              <div className="mob-nav-icon">{icon}</div>
+              <div>{label}</div>
+            </div>
+          ))}
+        </div>
+      </nav>
+
+      {/* FAB */}
+      <div className="fab" onClick={()=>setActiveTab('coach')} title="Open AI Coach">✨</div>
+    </>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>
